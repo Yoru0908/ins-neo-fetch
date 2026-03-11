@@ -2,6 +2,8 @@
 
 A lightweight Instagram content fetcher powered by [Neo CLI](https://github.com/4ier/neo). Downloads stories and posts from target accounts using Instagram's private API through a real Chrome browser session via Chrome DevTools Protocol (CDP).
 
+English | [中文](./README_CN.md)
+
 ## Features
 
 - **Stories & Posts** — Fetches both active stories and recent posts (with carousel/multi-image support)
@@ -126,6 +128,51 @@ downloads/
 │   └── ...
 └── dedup_database.json
 ```
+
+## Frontend Display & Storage
+
+The downloaded content can be served to a web frontend via multiple storage backends.
+
+### API Server (Local)
+
+A simple Flask API server can scan the download directory and generate an R2-compatible JSON file list for frontend consumption:
+
+```python
+# Core config
+DOWNLOAD_DIR = "/path/to/downloads"
+ALIST_BASE = "http://your-server:5244"
+ALIST_MOUNT = "/instagram"
+API_PORT = 8082
+```
+
+### AList (Recommended for NAS)
+
+[AList](https://github.com/alist-org/alist) can mount local directories as HTTP/WebDAV services:
+
+1. Install AList and add local storage
+2. Mount the download directory at `/instagram`
+3. API Server generates direct links: `https://your-alist.com/d/instagram/username/stories/20260311/file.jpg`
+
+### Cloudflare R2 / AWS S3
+
+Sync downloaded files to cloud storage with rclone:
+
+```bash
+# Cloudflare R2
+rclone sync ./downloads r2:your-bucket/media/ --progress
+
+# AWS S3
+rclone sync ./downloads s3:your-bucket/media/ --progress
+```
+
+### Comparison
+
+| Solution | Best For | Pros | Cons |
+|----------|----------|------|------|
+| **Local + AList** | NAS / Home server | Free, simple | Requires tunneling for public access |
+| **Cloudflare R2** | Public access | Free 10GB, CDN | Needs domain + config |
+| **AWS S3** | Enterprise | High availability | Pay-per-use |
+| **Local + API Server** | Development | Simplest setup | LAN only |
 
 ## Acknowledgments
 
