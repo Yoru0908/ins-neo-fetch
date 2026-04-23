@@ -1,0 +1,20 @@
+[Unit]
+Description=Instagram Neo Chrome (Xvfb + Chromium + CDP)
+After=network.target
+
+[Service]
+Type=forking
+User=srzwyuu
+Environment=DISPLAY=:99
+Environment=PATH=/vol1/@appcenter/nodejs_v22/bin:/usr/local/bin:/usr/bin:/bin
+
+ExecStartPre=/usr/bin/Xvfb :99 -screen 0 1920x1080x24 &
+ExecStart=/usr/bin/chromium --remote-debugging-port=9222 --user-data-dir=/vol1/ins-neo-fetcher/chrome-profile --no-first-run --no-sandbox --disable-dev-shm-usage --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding https://www.instagram.com/
+Restart=always
+RestartSec=30
+
+StandardOutput=append:/vol1/ins-neo-fetcher/logs/chrome.log
+StandardError=append:/vol1/ins-neo-fetcher/logs/chrome.log
+
+[Install]
+WantedBy=multi-user.target
